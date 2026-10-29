@@ -27,7 +27,7 @@ int main() {
         std::cout << "\nBalance: " << account
                   << "\n1. Deposit\n2. Withdraw\n3. Accrue interest\n0. Exit\nChoice: ";
 
-        int choice;
+        int choice{};
         if (!(std::cin >> choice)) {
             if (std::cin.eof()) {
                 break;
@@ -46,7 +46,7 @@ int main() {
         }
 
         std::cout << (choice == 3 ? "Interest rate (%): " : "Amount: ");
-        double value;
+        double value{};
         if (!(std::cin >> value)) {
             if (std::cin.eof()) {
                 break;

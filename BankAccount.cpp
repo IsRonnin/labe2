@@ -4,7 +4,6 @@
 #include <istream>
 #include <ostream>
 #include <stdexcept>
-#include <utility>
 
 BankAccount::BankAccount() : BankAccount(0.0) {}
 
@@ -16,7 +15,9 @@ BankAccount::BankAccount(const BankAccount& other)
     : BankAccount(other.getBalance()) {}
 
 BankAccount::BankAccount(BankAccount&& other) noexcept
-    : balance_(std::exchange(other.balance_, nullptr)) {}
+    : balance_(other.balance_) {
+    other.balance_ = nullptr;
+}
 
 BankAccount::~BankAccount() {
     delete balance_;
@@ -32,7 +33,8 @@ BankAccount& BankAccount::operator=(const BankAccount& other) {
 BankAccount& BankAccount::operator=(BankAccount&& other) noexcept {
     if (this != &other) {
         delete balance_;
-        balance_ = std::exchange(other.balance_, nullptr);
+        balance_ = other.balance_;
+        other.balance_ = nullptr;
     }
     return *this;
 }
@@ -78,14 +80,15 @@ void BankAccount::accrueInterest(double rate) {
 }
 
 std::istream& operator>>(std::istream& input, BankAccount& account) {
-    double balance;
-    if (input >> balance) {
-        if (std::isfinite(balance) && balance >= 0.0) {
-            account.setBalance(balance);
-        } else {
-            input.setstate(std::ios::failbit);
-        }
+    double balance{};
+    if (!(input >> balance)) {
+        return input;
     }
+    if (!std::isfinite(balance) || balance < 0.0) {
+        input.setstate(std::ios::failbit);
+        return input;
+    }
+    account.setBalance(balance);
     return input;
 }
 
